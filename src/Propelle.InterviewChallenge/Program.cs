@@ -13,7 +13,6 @@ namespace Propelle.InterviewChallenge
             // Add services to the container.
             builder.Services.AddDbContext<PaymentsContext>();
             builder.Services.AddSingleton<IInvestrClient, InvestrClient>();
-            builder.Services.AddSingleton<ITaskClient, TaskClient>();
             builder.Services.AddFastEndpoints();
 
             var app = builder.Build();

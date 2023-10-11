@@ -21,16 +21,13 @@ namespace Propelle.InterviewChallenge.Endpoints
         public class Endpoint : Endpoint<Request, Response>
         {
             private readonly PaymentsContext _paymentsContext;
-            private readonly ITaskClient _taskClient;
             private readonly IInvestrClient _investrClient;
 
             public Endpoint(
                 PaymentsContext paymentsContext,
-                ITaskClient taskClient,
                 IInvestrClient investrClient)
             {
                 _paymentsContext = paymentsContext;
-                _taskClient = taskClient;
                 _investrClient = investrClient;
             }
 
@@ -45,8 +42,7 @@ namespace Propelle.InterviewChallenge.Endpoints
                 _paymentsContext.Deposits.Add(deposit);
 
                 await _paymentsContext.SaveChangesAsync(ct);
-
-                await _taskClient.Enqueue(() => _investrClient.MakeDeposit(deposit.UserId, deposit.Amount));
+                await _investrClient.MakeDeposit(deposit.UserId, deposit.Amount);
 
                 await SendAsync(new Response { DepositId = deposit.Id }, 201, ct);
             }

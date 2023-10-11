@@ -44,8 +44,16 @@ namespace Propelle.InterviewChallenge.Tests
             using var context = scope.ServiceProvider.GetService<PaymentsContext>();
             var investrClient = scope.ServiceProvider.GetService<IInvestrClient>();
 
-            Assert.Equal(iterations, await context.Deposits.CountAsync());
-            Assert.Equal(iterations, investrClient.SentDeposits.Count());
+            var deposits = await context.Deposits.ToListAsync();
+            var sentDeposits = investrClient.SentDeposits.ToList();
+
+            Assert.Equal(iterations, deposits.Count);
+            Assert.Equal(iterations, sentDeposits.Count);
+
+            foreach (var deposit in deposits)
+            {
+                Assert.Contains((deposit.UserId, deposit.Amount), sentDeposits);
+            }
         }
 
         private static MakeDeposit.Request GenerateMakeDepositRequest()
