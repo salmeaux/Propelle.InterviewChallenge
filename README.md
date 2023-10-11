@@ -27,4 +27,6 @@ Your challenge is to get all the tests passing, but there are a few rules:
 
 Don't spend too long on this challenge (as a guideline: no more than 1 hour), but be ready to discuss your solution and the changes you make.
 
+To show us your changes, fork this repository, and send a link back to us (make sure it's a publicly available repository)
+
 Have fun :)
