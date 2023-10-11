@@ -1,6 +1,10 @@
 using FastEndpoints;
 using Propelle.InterviewChallenge.Application;
 using Propelle.InterviewChallenge.Application.Domain;
+using Propelle.InterviewChallenge.Application.Domain.Events;
+using Propelle.InterviewChallenge.Application.EventBus;
+using Propelle.InterviewChallenge.Application.EventHandlers;
+using Propelle.InterviewChallenge.EventHandling;
 
 namespace Propelle.InterviewChallenge
 {
@@ -13,6 +17,9 @@ namespace Propelle.InterviewChallenge
             // Add services to the container.
             builder.Services.AddDbContext<PaymentsContext>();
             builder.Services.AddSingleton<IInvestrClient, InvestrClient>();
+            builder.Services.AddSingleton<InMemoryEventExchange>();
+            builder.Services.AddSingleton<Application.EventBus.IEventBus, SimpleEventBus>();
+            builder.Services.AddTransient<EventHandling.IEventHandler<DepositMade>, SubmitDeposit>();
             builder.Services.AddFastEndpoints();
 
             var app = builder.Build();

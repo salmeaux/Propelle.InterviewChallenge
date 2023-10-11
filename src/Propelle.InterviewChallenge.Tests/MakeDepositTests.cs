@@ -18,25 +18,16 @@ namespace Propelle.InterviewChallenge.Tests
 
         [Theory]
         [InlineData(100)]
-        public async Task MakeDeposit_XTimesSuccessfully_AlwaysProcessesXDepositsWithInvestr(int iterations)
+        public async Task MakeDeposit_XTimesSuccessfully_AlwaysProcessesXDeposits(int iterations)
         {
             var client = _factory.CreateClient();
 
             for (var i = 0; i < iterations; i++)
             {
                 // Simulate a customer retrying a deposit if something goes wrong
-                bool isSuccess = false;
-                while (!isSuccess)
-                {
-                    try
-                    {
-                        var (result, _) = await client.POSTAsync<MakeDeposit.Endpoint, MakeDeposit.Request, MakeDeposit.Response>(GenerateMakeDepositRequest());
-                        isSuccess = result.IsSuccessStatusCode;
-                    }
-                    catch
-                    {
-                    }
-                }
+                await TryUntilSuccessful(
+                    () => client.POSTAsync<MakeDeposit.Endpoint, MakeDeposit.Request, MakeDeposit.Response>(GenerateMakeDepositRequest()),
+                    x => x.Response.IsSuccessStatusCode);
             }
 
             // Assertions
@@ -45,7 +36,7 @@ namespace Propelle.InterviewChallenge.Tests
             var investrClient = scope.ServiceProvider.GetService<IInvestrClient>();
 
             var deposits = await context.Deposits.ToListAsync();
-            var sentDeposits = investrClient.SentDeposits.ToList();
+            var sentDeposits = investrClient.SubmittedDeposits.ToList();
 
             Assert.Equal(iterations, deposits.Count);
             Assert.Equal(iterations, sentDeposits.Count);
@@ -55,6 +46,48 @@ namespace Propelle.InterviewChallenge.Tests
                 Assert.Contains((deposit.UserId, deposit.Amount), sentDeposits);
             }
         }
+
+        [Theory]
+        [InlineData(100)]
+        public async Task MakeDeposit_XTimesSuccessfully_DoesntAttemptSubmissionsDuringRequest(int iterations)
+        {
+            var client = _factory.CreateClient();
+
+            for (var i = 0; i < iterations; i++)
+            {
+                // Simulate a customer retrying a deposit if something goes wrong
+                await TryUntilSuccessful(
+                    () => client.POSTAsync<MakeDeposit.Endpoint, MakeDeposit.Request, MakeDeposit.Response>(GenerateMakeDepositRequest()),
+                    x => x.Response.IsSuccessStatusCode);
+            }
+
+            using var scope = _factory.Services.CreateScope();
+            var investrClient = scope.ServiceProvider.GetService<IInvestrClient>();
+        }
+
+        private static async Task<T> TryUntilSuccessful<T>(
+            Func<Task<T>> @delegate,
+            Func<T, bool> successCondition = null)
+        {
+            bool isSuccess = false;
+            while (!isSuccess)
+            {
+                try
+                {
+                    var result = await @delegate();
+                    if (successCondition == default || successCondition(result))
+                    {
+                        return result;
+                    }
+                }
+                catch
+                {
+                }
+            }
+
+            return default;
+        }
+
 
         private static MakeDeposit.Request GenerateMakeDepositRequest()
         {

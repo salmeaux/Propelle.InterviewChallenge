@@ -13,7 +13,8 @@ namespace Propelle.InterviewChallenge.Application
             base.OnModelCreating(modelBuilder);
 
             var depositConfig = modelBuilder.Entity<Deposit>();
-            depositConfig.HasKey(x => x.UserId);
+            depositConfig.HasKey(x => x.Id);
+            depositConfig.Property(x => x.UserId).IsRequired();
             depositConfig.Property(x => x.Amount).IsRequired();
         }
 
@@ -28,7 +29,6 @@ namespace Propelle.InterviewChallenge.Application
             public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
             {
                 PointOfFailure.SimulatePotentialFailure();
-
 
                 return base.SavingChanges(eventData, result);
             }

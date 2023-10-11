@@ -2,8 +2,8 @@
 {
     public interface IInvestrClient
     {
-        IEnumerable<(Guid UserId, decimal Amount)> SentDeposits { get; }
+        IEnumerable<(Guid UserId, decimal Amount)> SubmittedDeposits { get; }
 
-        Task MakeDeposit(Guid userId, decimal amount);
+        Task SubmitDeposit(Guid userId, decimal amount);
     }
 }

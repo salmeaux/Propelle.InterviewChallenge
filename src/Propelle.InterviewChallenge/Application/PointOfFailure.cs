@@ -15,7 +15,7 @@
 
             if (val == 5)
             {
-                throw new PointOfFailureException();
+                throw new TransientException();
             }
         }
     }

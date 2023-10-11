@@ -1,6 +1,7 @@
 ﻿using FastEndpoints;
 using Propelle.InterviewChallenge.Application;
 using Propelle.InterviewChallenge.Application.Domain;
+using Propelle.InterviewChallenge.Application.Domain.Events;
 
 namespace Propelle.InterviewChallenge.Endpoints
 {
@@ -21,14 +22,14 @@ namespace Propelle.InterviewChallenge.Endpoints
         public class Endpoint : Endpoint<Request, Response>
         {
             private readonly PaymentsContext _paymentsContext;
-            private readonly IInvestrClient _investrClient;
+            private readonly Application.EventBus.IEventBus _eventBus;
 
             public Endpoint(
                 PaymentsContext paymentsContext,
-                IInvestrClient investrClient)
+                Application.EventBus.IEventBus eventBus)
             {
                 _paymentsContext = paymentsContext;
-                _investrClient = investrClient;
+                _eventBus = eventBus;
             }
 
             public override void Configure()
@@ -42,7 +43,11 @@ namespace Propelle.InterviewChallenge.Endpoints
                 _paymentsContext.Deposits.Add(deposit);
 
                 await _paymentsContext.SaveChangesAsync(ct);
-                await _investrClient.MakeDeposit(deposit.UserId, deposit.Amount);
+
+                await _eventBus.Publish(new DepositMade
+                {
+                    Id = deposit.Id
+                });
 
                 await SendAsync(new Response { DepositId = deposit.Id }, 201, ct);
             }

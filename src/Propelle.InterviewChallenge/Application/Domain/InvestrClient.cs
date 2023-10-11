@@ -2,20 +2,20 @@
 {
     public class InvestrClient : IInvestrClient
     {
-        private readonly List<(Guid UserId, decimal Amount)> _sentDeposits;
+        private readonly List<(Guid UserId, decimal Amount)> _submittedDeposits;
 
-        public IEnumerable<(Guid UserId, decimal Amount)> SentDeposits => _sentDeposits;
+        public IEnumerable<(Guid UserId, decimal Amount)> SubmittedDeposits => _submittedDeposits;
 
         public InvestrClient()
         {
-            _sentDeposits = new List<(Guid UserId, decimal Amount)>();
+            _submittedDeposits = new List<(Guid UserId, decimal Amount)>();
         }
 
-        public Task MakeDeposit(Guid userId, decimal amount)
+        public Task SubmitDeposit(Guid userId, decimal amount)
         {
             PointOfFailure.SimulatePotentialFailure();
 
-            _sentDeposits.Add((userId, amount));
+            _submittedDeposits.Add((userId, amount));
 
             return Task.CompletedTask;
         }
