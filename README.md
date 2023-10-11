@@ -9,8 +9,8 @@ Although this sounds like a simple problem, it's not always that easy. There are
 1. The SmartInvest API is unreliable and can often throw transient exceptions
 1. The Database can go down for maintenance at any time
 
-Although this application doesn't use a real database or consume a real API, the transient issues caused by these 2 points of failure
-are simulated to have a 20% chance of failing. So when large volumes of deposits are coming in, we need to be sure that we can
+Although this application doesn't use a real database or consume a real API, the transient issues caused by these 2 services
+are simulated to have a 20% chance of failing whenever they are invoked. So when large volumes of deposits are coming in, we need to be sure that we can
 recover from these failures and ensure that the deposits are processed.
 
 ## Your Challenge
