@@ -1,6 +1,6 @@
 ﻿namespace Propelle.InterviewChallenge.Application.Domain
 {
-    public interface IInvestrClient
+    public interface ISmartInvestClient
     {
         IEnumerable<(Guid UserId, decimal Amount)> SubmittedDeposits { get; }
 

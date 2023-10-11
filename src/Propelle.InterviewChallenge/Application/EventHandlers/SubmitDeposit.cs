@@ -7,19 +7,19 @@ namespace Propelle.InterviewChallenge.Application.EventHandlers
     public class SubmitDeposit : IEventHandler<DepositMade>
     {
         private readonly PaymentsContext _context;
-        private readonly IInvestrClient _investrClient;
+        private readonly ISmartInvestClient _smartInvestClient;
 
-        public SubmitDeposit(PaymentsContext context, IInvestrClient investrClient)
+        public SubmitDeposit(PaymentsContext context, ISmartInvestClient smartInvestClient)
         {
             _context = context;
-            _investrClient = investrClient;
+            _smartInvestClient = smartInvestClient;
         }
 
         public async Task Handle(DepositMade @event)
         {
             var deposit = await _context.Deposits.FindAsync(@event.Id);
 
-            await _investrClient.SubmitDeposit(deposit.UserId, deposit.Amount);
+            await _smartInvestClient.SubmitDeposit(deposit.UserId, deposit.Amount);
         }
     }
 }

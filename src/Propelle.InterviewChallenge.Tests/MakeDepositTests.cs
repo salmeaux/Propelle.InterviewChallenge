@@ -32,7 +32,7 @@ namespace Propelle.InterviewChallenge.Tests
             }
 
             using var scope = _factory.Services.CreateScope();
-            var investrClient = scope.ServiceProvider.GetService<IInvestrClient>();
+            var investrClient = scope.ServiceProvider.GetService<ISmartInvestClient>();
 
             var sentDeposits = investrClient.SubmittedDeposits
                 .Where(x => requests.Select(x => x.UserId).Contains(x.UserId))

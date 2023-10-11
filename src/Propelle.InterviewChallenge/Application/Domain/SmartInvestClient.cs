@@ -1,12 +1,12 @@
 ﻿namespace Propelle.InterviewChallenge.Application.Domain
 {
-    public class InvestrClient : IInvestrClient
+    public class SmartInvestClient : ISmartInvestClient
     {
         private readonly List<(Guid UserId, decimal Amount)> _submittedDeposits;
 
         public IEnumerable<(Guid UserId, decimal Amount)> SubmittedDeposits => _submittedDeposits;
 
-        public InvestrClient()
+        public SmartInvestClient()
         {
             _submittedDeposits = new List<(Guid UserId, decimal Amount)>();
         }

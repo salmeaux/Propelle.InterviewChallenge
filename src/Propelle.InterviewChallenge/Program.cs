@@ -16,7 +16,7 @@ namespace Propelle.InterviewChallenge
 
             // Add services to the container.
             builder.Services.AddDbContext<PaymentsContext>();
-            builder.Services.AddSingleton<IInvestrClient, InvestrClient>();
+            builder.Services.AddSingleton<ISmartInvestClient, SmartInvestClient>();
             builder.Services.AddSingleton<InMemoryEventExchange>();
             builder.Services.AddSingleton<Application.EventBus.IEventBus, SimpleEventBus>();
             builder.Services.AddTransient<EventHandling.IEventHandler<DepositMade>, SubmitDeposit>();

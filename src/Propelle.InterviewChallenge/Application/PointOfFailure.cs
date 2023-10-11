@@ -9,11 +9,11 @@
             _random = new Random();
         }
 
-        public static void SimulatePotentialFailure()
+        public static void SimulatePotentialFailure(double percentageChanceOfFailure = 0.2)
         {
-            var val = _random.Next(0, 6);
+            var val = _random.NextDouble();
 
-            if (val == 5)
+            if (val < percentageChanceOfFailure)
             {
                 throw new TransientException();
             }
