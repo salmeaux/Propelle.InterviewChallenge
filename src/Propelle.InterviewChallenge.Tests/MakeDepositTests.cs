@@ -21,19 +21,22 @@ namespace Propelle.InterviewChallenge.Tests
         public async Task MakeDeposit_XTimesSuccessfully_AlwaysProcessesXDeposits(int iterations)
         {
             var client = _factory.CreateClient();
+            var requests = GenerateMakeDepositRequests(iterations);
 
-            for (var i = 0; i < iterations; i++)
+            foreach (var request in requests)
             {
                 // Simulate a customer retrying a deposit if something goes wrong
                 await TryUntilSuccessful(
-                    () => client.POSTAsync<MakeDeposit.Endpoint, MakeDeposit.Request, MakeDeposit.Response>(GenerateMakeDepositRequest()),
+                    () => client.POSTAsync<MakeDeposit.Endpoint, MakeDeposit.Request, MakeDeposit.Response>(request),
                     x => x.Response.IsSuccessStatusCode);
             }
 
             using var scope = _factory.Services.CreateScope();
             var investrClient = scope.ServiceProvider.GetService<IInvestrClient>();
 
-            var sentDeposits = investrClient.SubmittedDeposits.ToList();
+            var sentDeposits = investrClient.SubmittedDeposits
+                .Where(x => requests.Select(x => x.UserId).Contains(x.UserId))
+                .ToList();
 
             Assert.Equal(iterations, sentDeposits.Count);
         }
@@ -43,12 +46,13 @@ namespace Propelle.InterviewChallenge.Tests
         public async Task MakeDeposit_XTimesSuccessfully_AlwaysStoresXDepositsInContext(int iterations)
         {
             var client = _factory.CreateClient();
+            var requests = GenerateMakeDepositRequests(iterations);
 
-            for (var i = 0; i < iterations; i++)
+            foreach (var request in requests)
             {
                 // Simulate a customer retrying a deposit if something goes wrong
                 await TryUntilSuccessful(
-                    () => client.POSTAsync<MakeDeposit.Endpoint, MakeDeposit.Request, MakeDeposit.Response>(GenerateMakeDepositRequest()),
+                    () => client.POSTAsync<MakeDeposit.Endpoint, MakeDeposit.Request, MakeDeposit.Response>(request),
                     x => x.Response.IsSuccessStatusCode);
             }
 
@@ -56,7 +60,9 @@ namespace Propelle.InterviewChallenge.Tests
             using var scope = _factory.Services.CreateScope();
             using var context = scope.ServiceProvider.GetService<PaymentsContext>();
 
-            var storedDeposits = await context.Deposits.ToListAsync();
+            var storedDeposits = await context.Deposits
+                .Where(x => requests.Select(x => x.UserId).Contains(x.UserId))
+                .ToListAsync();
 
             Assert.Equal(iterations, storedDeposits.Count);
         }
@@ -82,6 +88,18 @@ namespace Propelle.InterviewChallenge.Tests
             }
 
             return default;
+        }
+
+        private static IEnumerable<MakeDeposit.Request> GenerateMakeDepositRequests(int count)
+        {
+            var depositRequests = new List<MakeDeposit.Request>();
+
+            for (int i = 0; i < count; i++)
+            {
+                depositRequests.Add(GenerateMakeDepositRequest());
+            }
+
+            return depositRequests;
         }
 
 
