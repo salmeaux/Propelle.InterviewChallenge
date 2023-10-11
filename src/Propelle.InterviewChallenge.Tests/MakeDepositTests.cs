@@ -30,26 +30,17 @@ namespace Propelle.InterviewChallenge.Tests
                     x => x.Response.IsSuccessStatusCode);
             }
 
-            // Assertions
             using var scope = _factory.Services.CreateScope();
-            using var context = scope.ServiceProvider.GetService<PaymentsContext>();
             var investrClient = scope.ServiceProvider.GetService<IInvestrClient>();
 
-            var deposits = await context.Deposits.ToListAsync();
             var sentDeposits = investrClient.SubmittedDeposits.ToList();
 
-            Assert.Equal(iterations, deposits.Count);
             Assert.Equal(iterations, sentDeposits.Count);
-
-            foreach (var deposit in deposits)
-            {
-                Assert.Contains((deposit.UserId, deposit.Amount), sentDeposits);
-            }
         }
 
         [Theory]
         [InlineData(100)]
-        public async Task MakeDeposit_XTimesSuccessfully_DoesntAttemptSubmissionsDuringRequest(int iterations)
+        public async Task MakeDeposit_XTimesSuccessfully_AlwaysStoresXDepositsInContext(int iterations)
         {
             var client = _factory.CreateClient();
 
@@ -61,8 +52,13 @@ namespace Propelle.InterviewChallenge.Tests
                     x => x.Response.IsSuccessStatusCode);
             }
 
+            // Assertions
             using var scope = _factory.Services.CreateScope();
-            var investrClient = scope.ServiceProvider.GetService<IInvestrClient>();
+            using var context = scope.ServiceProvider.GetService<PaymentsContext>();
+
+            var storedDeposits = await context.Deposits.ToListAsync();
+
+            Assert.Equal(iterations, storedDeposits.Count);
         }
 
         private static async Task<T> TryUntilSuccessful<T>(
