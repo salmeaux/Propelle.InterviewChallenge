@@ -1,4 +1,5 @@
 ﻿using FastEndpoints;
+using Propelle.InterviewChallenge.FailureHandling;
 using Propelle.InterviewChallenge.Application;
 using Propelle.InterviewChallenge.Application.Domain;
 using Propelle.InterviewChallenge.Application.Domain.Events;
@@ -42,14 +43,22 @@ namespace Propelle.InterviewChallenge.Endpoints
                 var deposit = new Deposit(req.UserId, req.Amount);
                 _paymentsContext.Deposits.Add(deposit);
 
-                await _paymentsContext.SaveChangesAsync(ct);
+                var retryStrategy = new InfiniteRetryOnErrorStrategy();
 
-                await _eventBus.Publish(new DepositMade
-                {
-                    Id = deposit.Id
-                });
+                await FailureHandler.HandleAsync(
+                    () => _paymentsContext.SaveChangesAsync(ct), 
+                    retryStrategy);
 
-                await SendAsync(new Response { DepositId = deposit.Id }, 201, ct);
+                await FailureHandler.HandleAsync(
+                    () => _eventBus.Publish(new DepositMade
+                        {
+                            Id = deposit.Id
+                        }), 
+                    retryStrategy);
+
+                await FailureHandler.HandleAsync(
+                    () => SendAsync(new Response { DepositId = deposit.Id }, 201, ct), 
+                    retryStrategy);
             }
         }
     }
